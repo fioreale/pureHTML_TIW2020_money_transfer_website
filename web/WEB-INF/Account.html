@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" media="all"
+          href="../css/account.css" th:href="@{/css/account.css}">
+    <title>Account Page</title>
+</head>
+<body>
+<div class="nav">
+    <span class="back" th:href="@{GoToHome}">Home</span>
+    <span class="logout" th:href="@{/Logout}">Logout</span>
+</div>
+
+<h2>Account Details</h2>
+
+<h2>List of movements</h2>
+
+<h2>Transfer Money</h2>
+<form action=""
+      method="post">
+    user code: <input type="text" name="user code"><br>
+    account code: <input type="text" name="account code"><br>
+    subject: <input type="text" name="subject"><br>
+    amount: <input type="text" name="amount"><br>
+</form>
+
+</body>
+</html>
