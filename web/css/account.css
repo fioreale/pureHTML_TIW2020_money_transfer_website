@@ -1,0 +1,16 @@
+.logout {
+    padding-left: 94%;
+}
+
+.exit {
+    color: red;
+}
+
+.entrance {
+    color: forestgreen;
+}
+
+form input {
+    margin-left: 3em;
+    margin-bottom: 1em;
+}

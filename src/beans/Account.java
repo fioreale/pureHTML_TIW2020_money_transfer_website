@@ -5,7 +5,7 @@ import java.util.Random;
 
 public class Account {
     private int code;
-    private float balance;
+    private double balance;
     private ArrayList<Transfer> movements;
 
     private Integer generate_code() {
@@ -31,7 +31,7 @@ public class Account {
         this.code = code;
     }
 
-    public float getBalance() {
+    public double getBalance() {
         return balance;
     }
 

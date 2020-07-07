@@ -28,16 +28,12 @@ public class LoginDAO {
             result = pstatement.executeQuery();
             while (result.next()) {
                 user = new User();
-                user.setName(result.getString("name") + result.getString("surname"));
+                user.setName(result.getString("username"));
                 user.setCode(result.getInt("code"));
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            try {
-                throw new SQLException(e);
-            } catch (SQLException throwables) {
-                throwables.printStackTrace();
-            }
+            throw new SQLException(e);
 
         } finally {
             try {
@@ -45,22 +41,14 @@ public class LoginDAO {
                     result.close();
                 }
             } catch (Exception e1) {
-                try {
-                    throw new SQLException(e1);
-                } catch (SQLException throwables) {
-                    throwables.printStackTrace();
-                }
+                throw new SQLException(e1);
             }
             try {
                 if (pstatement != null) {
                     pstatement.close();
                 }
             } catch (Exception e2) {
-                try {
-                    throw new SQLException(e2);
-                } catch (SQLException throwables) {
-                    throwables.printStackTrace();
-                }
+                throw new SQLException(e2);
             }
         }
         return user;

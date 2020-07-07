@@ -3,27 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" type="text/css" media="all"
-          href="../css/account.css" th:href="@{/css/account.css}">
+          href="../css/account.css" th:href="@{css/account.css}">
     <title>Account Page</title>
 </head>
 <body>
 <div class="nav">
-    <span class="back" th:href="@{GoToHome}">Home</span>
+    <span class="back" th:href="@{/GoToHome}">Home</span>
     <span class="logout" th:href="@{/Logout}">Logout</span>
 </div>
 
 <h2>Account Details</h2>
+<p><b>Count Balance: </b><span th:text="${session.currentUser.getAccount(#response.getHeader('chosenAccount')).getBalance()}">0</span>
+</p>
+<p><b>Count Owner: </b><span th:text="${session.currentUser.getName()}">Alessio</span></p>
 
 <h2>List of movements</h2>
+<div th:each="transfer : ${session.currentUser.getAccount(#response.getHeader('chosenAccount')).getMovements()}">
+    <div th:if="${transfer.getOrigin_account()==#response.getHeader('chosenAccount')}">
+        <span th:text="${'|date: ' + transfer.getDate() + ' |transferred money to account: ' +
+    transfer.getDest_account() + ' |amount: '}">|date: 2020-10-3 |transferred money to account: 123456 |amount: </span>
+        <span class="exit" th:text="${transfer.getAmount()}">700</span>
+    </div>
+    <div th:if="${transfer.getDest_account()==#response.getHeader('chosenAccount')}">
+        <span th:text="${'|date: ' + transfer.getDate() + ' |received money from account: ' +
+    transfer.getOrigin_account() + ' |amount: '}"></span>
+        <span class="entrance" th:text="${transfer.getAmount()}"></span>
+    </div>
+</div>
 
 <h2>Transfer Money</h2>
-<form action=""
+<form th:action="@{/AccountStatusController}"
       method="post">
-    user code: <input type="text" name="user code"><br>
-    account code: <input type="text" name="account code"><br>
+    user code: <input type="text" name="user_code"><br>
+    account code: <input type="text" name="account_code"><br>
     subject: <input type="text" name="subject"><br>
     amount: <input type="text" name="amount"><br>
+    <input type="hidden" name="chosenAccountField" th:value="${#response.getHeader('chosenAccount')}">
+    <input type="submit" name="submit" value="Transfer">
 </form>
-
 </body>
 </html>

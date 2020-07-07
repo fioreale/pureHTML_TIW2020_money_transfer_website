@@ -3,23 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" type="text/css" media="all"
-          href="../css/home.css" th:href="@{/css/home.css}">
+          href="../css/home.css" th:href="@{css/home.css}">
     <title>Home</title>
 </head>
 <body>
 <div class="logout">
     <a th:href="@{/Logout}">Logout</a>
 </div>
-<h1>List of Account for the user
-    <span th:text="${session.user.username}">Alessio</span>
+<h1>
+    List of Accounts
 </h1>
+<h2>
+    User ~<span th:text="${session.currentUser.getName()}">Alessio</span>~
+</h2>
+<h3>
+    User Code ~<span th:text="${session.currentUser.getCode()}">123456</span>~
+</h3>
 <form th:action="@{/AccountStatusController}"
       method="get">
     <fieldset>
         <legend>Choose an Account:</legend>
-        <div th:each="acc : ${accounts}">
-            <span th:text="${'Account: ' + acc.code}"></span>
-            <input type="radio" name="account_code" th:value="${acc.code}" required/>
+        <div th:each="acc : ${session.currentUser.getAccounts()}">
+            <span th:text="${'Account: ' + acc.getCode()}"></span>
+            <input type="radio" name="account_code" th:value="${acc.getCode()}" required/>
         </div>
     </fieldset>
     <input type="submit" name="submit" value="Go to the Account">

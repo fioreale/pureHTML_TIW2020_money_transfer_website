@@ -36,15 +36,13 @@ public class LoginController extends HttpServlet {
             ServletContext servletContext = getServletContext();
             ServletContextTemplateResolver templateResolver = new ServletContextTemplateResolver(servletContext);
             templateResolver.setTemplateMode(TemplateMode.HTML);
-            this.templateEngine = new TemplateEngine();
-            this.templateEngine.setTemplateResolver(templateResolver);
             templateResolver.setSuffix(".html");
-//            String driver = servletContext.getInitParameter("dbDriver");
-//            String url = servletContext.getInitParameter("dbUrl");
-//            String user = servletContext.getInitParameter("dbUser");
-//            String password = servletContext.getInitParameter("dbPassword");
-//            Class.forName(driver);
-//            connection = DriverManager.getConnection(url, user, password);
+            String driver = servletContext.getInitParameter("dbDriver");
+            String url = servletContext.getInitParameter("dbUrl");
+            String user = servletContext.getInitParameter("dbUser");
+            String password = servletContext.getInitParameter("dbPassword");
+            Class.forName(driver);
+            connection = DriverManager.getConnection(url, user, password);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
             throw new UnavailableException("Can't load database driver");
@@ -61,8 +59,6 @@ public class LoginController extends HttpServlet {
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
-        log("entered in post login");
 
         String username = request.getParameter("username");
         String password = request.getParameter("password");
@@ -83,10 +79,13 @@ public class LoginController extends HttpServlet {
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
+
         String path = getServletContext().getContextPath();
-        if (user != null) {
+        if (user == null) {
+            path += "/index.html";
+        } else {
+            HomeDAO homeDAO = new HomeDAO(connection, user);
             try {
-                HomeDAO homeDAO = new HomeDAO(connection,user);
                 user = homeDAO.fillAccounts(user);
             } catch (SQLException throwables) {
                 throwables.printStackTrace();
@@ -94,14 +93,7 @@ public class LoginController extends HttpServlet {
             //redirect to Home Page
             HttpSession session = request.getSession();
             session.setAttribute("currentUser", user);
-            path = getServletContext().getContextPath() + "/HomePageController";
-            ServletContext servletContext = getServletContext();
-            // thymeleaf context
-            final WebContext ctx = new WebContext(request,response,servletContext,request.getLocale());
-            ctx.setVariable("actualUser",user);
-            templateEngine.process(path,ctx,response.getWriter());
-        } else {
-            response.sendError(505, "Invalid user");
+            path += "/HomePageController";
         }
         response.sendRedirect(path);
     }

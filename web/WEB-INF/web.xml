@@ -5,15 +5,15 @@
     <display-name>TIW-TransferMoney</display-name>
     <context-param>
         <param-name>dbUrl</param-name>
-        <param-value>jdbc:mysql://127.0.0.1:4000/GestioneConti_TIW</param-value>
+        <param-value>jdbc:mysql://127.0.0.1:3306/gestioneconti?serverTimezone=UTC</param-value>
     </context-param>
     <context-param>
         <param-name>dbUser</param-name>
-        <param-value>root</param-value>
+        <param-value>tiw</param-value>
     </context-param>
     <context-param>
         <param-name>dbPassword</param-name>
-        <param-value>Alexxio1996</param-value>
+        <param-value>Gestione2020</param-value>
     </context-param>
     <context-param>
         <param-name>dbDriver</param-name>

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Transfer</title>
+</head>
+<body>
+<h1>Unfortunately it was not possible to proceed with the transfer</h1>
+<h2>The occurred failure is due to the issue:</h2>
+<div>
+    <span th:if="${#response.getHeader('outcome')==1}">
+        The balance of your account is not enough to afford the transaction.
+    </span>
+    <span th:if="${#response.getHeader('outcome')==2}">
+        Problem in the insertion of the transfer into the DB.
+    </span>
+    <span th:if="${#response.getHeader('outcome')==3}">
+        Problem in updating your account balance.
+    </span>
+    <span th:if="${#response.getHeader('outcome')==4}">
+        Problem in updating receiver balance or one of the codes (account or user) you inserted is not valid.
+    </span>
+</div>
+</body>
+</html>

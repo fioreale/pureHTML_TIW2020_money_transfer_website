@@ -21,7 +21,7 @@ public class HomeDAO {
     public User fillAccounts(User user)
             throws SQLException {
         int usr_code = user.getCode();
-        String query = "SELECT * FROM user U JOIN accounts A ON U.code = A.code_user WHERE A.code_user = ?";
+        String query = "SELECT * FROM accounts WHERE code_user = ?";
         ResultSet result = null;
         PreparedStatement pstatement = null;
 
@@ -32,8 +32,8 @@ public class HomeDAO {
             ArrayList<Account> list = new ArrayList<Account>(0);
             while (result.next()) {
                 Account account = new Account();
-                account.setCode(result.getInt("A.code_user"));
-                account.setBalance(result.getInt("A.balance"));
+                account.setCode(result.getInt("code_account"));
+                account.setBalance(result.getInt("balance"));
                 list.add(account);
             }
             user.setAccounts(list);
