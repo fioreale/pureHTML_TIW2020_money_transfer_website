@@ -8,28 +8,62 @@
 </head>
 <body>
 <div class="nav">
-    <span class="back" th:href="@{/GoToHome}">Home</span>
-    <span class="logout" th:href="@{/Logout}">Logout</span>
+    <a class="back" href="Home.html" th:href="@{/HomePageController}">Home</a>
+    <a class="logout" href="../index.html" th:href="@{/Logout}">Logout</a>
 </div>
 
 <h2>Account Details</h2>
-<p><b>Count Balance: </b><span th:text="${session.currentUser.getAccount(#response.getHeader('chosenAccount')).getBalance()}">0</span>
+<p><b>Balance: </b><span
+        th:text="${session.currentUser.getAccount(#response.getHeader('chosenAccount')).getBalance()}">0</span>
 </p>
-<p><b>Count Owner: </b><span th:text="${session.currentUser.getName()}">Alessio</span></p>
+<p><b>Owner: </b><span th:text="${session.currentUser.getName()}">Alessio</span></p>
+<p><b>Code: </b><span th:text="${#response.getHeader('chosenAccount')}">Alessio</span></p>
 
 <h2>List of movements</h2>
-<div th:each="transfer : ${session.currentUser.getAccount(#response.getHeader('chosenAccount')).getMovements()}">
-    <div th:if="${transfer.getOrigin_account()==#response.getHeader('chosenAccount')}">
-        <span th:text="${'|date: ' + transfer.getDate() + ' |transferred money to account: ' +
-    transfer.getDest_account() + ' |amount: '}">|date: 2020-10-3 |transferred money to account: 123456 |amount: </span>
-        <span class="exit" th:text="${transfer.getAmount()}">700</span>
-    </div>
-    <div th:if="${transfer.getDest_account()==#response.getHeader('chosenAccount')}">
-        <span th:text="${'|date: ' + transfer.getDate() + ' |received money from account: ' +
-    transfer.getOrigin_account() + ' |amount: '}"></span>
-        <span class="entrance" th:text="${transfer.getAmount()}"></span>
-    </div>
-</div>
+<h3>Outgoing</h3>
+<table border="1">
+    <thead>
+    <tr>
+        <th>code</th>
+        <th>date</th>
+        <th>transferred money to account</th>
+        <th>amount</th>
+        <th>subject</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="transfer : ${session.currentUser.getAccount(#response.getHeader('chosenAccount')).getMovements()}"
+        th:if="${transfer.getOrigin_account()==#response.getHeader('chosenAccount')}">
+        <td th:text="${transfer.getTransfer_code()}"></td>
+        <td th:text="${transfer.getDate()}"></td>
+        <td th:text="${transfer.getDest_account()}"></td>
+        <td class="exit" th:text="${transfer.getAmount()}"></td>
+        <td th:text="${transfer.getSubject()}"></td>
+    </tr>
+    </tbody>
+</table>
+<h3>Incoming</h3>
+<table border="1">
+    <thead>
+    <tr>
+        <th>code</th>
+        <th>date</th>
+        <th>received money from account</th>
+        <th>amount</th>
+        <th>subject</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="transfer : ${session.currentUser.getAccount(#response.getHeader('chosenAccount')).getMovements()}"
+        th:if="${transfer.getDest_account()==#response.getHeader('chosenAccount')}">
+        <td th:text="${transfer.getTransfer_code()}"></td>
+        <td th:text="${transfer.getDate()}"></td>
+        <td th:text="${transfer.getDest_account()}"></td>
+        <td class="entrance" th:text="${transfer.getAmount()}"></td>
+        <td th:text="${transfer.getSubject()}"></td>
+    </tr>
+    </tbody>
+</table>
 
 <h2>Transfer Money</h2>
 <form th:action="@{/AccountStatusController}"

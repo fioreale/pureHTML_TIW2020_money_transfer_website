@@ -4,10 +4,7 @@ import beans.Account;
 import beans.Transfer;
 import beans.User;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -34,8 +31,9 @@ public class AccountDAO {
             result = pstatement.executeQuery();
             while (result.next()) {
                 Transfer transfer = new Transfer();
-                transfer.setAmount(result.getInt("amount"));
-                transfer.setDate(result.getDate("date"));
+                transfer.setTransfer_code(result.getInt("transfer_code"));
+                transfer.setAmount(result.getDouble("amount"));
+                transfer.setDate(result.getTimestamp("date"));
                 transfer.setDest_account(result.getInt("destination_account"));
                 transfer.setOrigin_account(result.getInt("origin_account"));
                 transfer.setSubject(result.getString("subject"));
@@ -71,72 +69,104 @@ public class AccountDAO {
     public int doTransfer(int origin_user, int origin_account,
                           int dest_user, int dest_account, String subject, double amount)
             throws SQLException {
-        int done;
 
+        int out = -1;
+        // check on the validity of the destination
+        if (!checkValidity(dest_user, dest_account)) {
+            return 5;
+        }
+        // check on the amount consistency
         if (!check_amount(amount, origin_account)) {
             return 1;
         }
 
-        // update of destination account.
+        Savepoint savepoint1 = null;
+        try {
+            double balance_origin = getBalance(origin_user, origin_account);
+            double balance_dest = getBalance(dest_user, dest_account);
 
-        done = updateBalance(con, dest_user, dest_account, amount, 2);
+            con.setAutoCommit(false);
 
-        // update of origin account.
-        if (done == 0)
-            done = updateBalance(con, origin_user, origin_account, amount, 1);
+            // saving a breakpoint
+            savepoint1 = con.setSavepoint("Savepoint1");
 
-        // adding the transfer
-        if (done == 0) {
-            String query1 = "INSERT into transfers (transfer_code,origin_account,destination_account,amount,date,subject) " +
-                    "VALUES(?,?,?,?,?,?)";
-            PreparedStatement pstatement1 = null;
+            // update destination
+            out = updateBalance(con, dest_user, dest_account, amount, balance_dest, 2);
+            // update origin
+            if (out == 0)
+                out = updateBalance(con, origin_user, origin_account, amount, balance_origin, 1);
+            // update transfers
+            if (out == 0)
+                out = updateTransfers(con, origin_user, origin_account,
+                        dest_user, dest_account, subject, amount);
+            con.commit();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            con.rollback(savepoint1);
+            con.setAutoCommit(true);
+        } finally {
+            if (out != 0) {
+                con.rollback(savepoint1);
+            }
+            con.setAutoCommit(true);
+        }
 
+        return out;
+    }
+
+    private boolean checkValidity(int dest_user, int dest_account) {
+        String query = "SELECT * FROM accounts WHERE code_user = ? AND code_account = ?";
+        ResultSet result = null;
+        PreparedStatement pstatement = null;
+        try {
+            pstatement = con.prepareStatement(query);
+            pstatement.setInt(1, dest_user);
+            pstatement.setInt(2, dest_account);
+            result = pstatement.executeQuery();
+            if (!result.next()) {
+                return false;
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+            return false;
+        } finally {
             try {
-                pstatement1 = con.prepareStatement(query1);
-                pstatement1.setInt(1, generator());
-                pstatement1.setInt(2, origin_account);
-                pstatement1.setInt(3, dest_account);
-                pstatement1.setDouble(4, amount);
-                pstatement1.setDate(5, java.sql.Date.valueOf(java.time.LocalDate.now()));
-                pstatement1.setString(6, subject);
-                pstatement1.executeUpdate();
-            } catch (SQLException e) {
-                return 2;
-            } finally {
+                if (result != null) {
+                    result.close();
+                }
+            } catch (Exception e1) {
                 try {
-                    if (pstatement1 != null) {
-                        pstatement1.close();
-                    }
-                } catch (Exception e2) {
-                    try {
-                        throw new SQLException(e2);
-                    } catch (SQLException throwables) {
-                        throwables.printStackTrace();
-                    }
+                    throw new SQLException(e1);
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
+            }
+            try {
+                if (pstatement != null) {
+                    pstatement.close();
+                }
+            } catch (Exception e2) {
+                try {
+                    throw new SQLException(e2);
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
                 }
             }
         }
-
-        return done;
+        return true;
     }
 
     private boolean check_amount(double amount, int account) {
         return user.getAccount(account).getBalance() >= amount;
     }
 
-    private int generator() {
-        Random random = new Random();
-        return random.nextInt(8999999) + 1000000;
-    }
-
-    private int updateBalance(Connection con, int user_code, int account, double amount, int type)
+    private int updateBalance(Connection con, int user_code, int account, double amount, double balance, int type)
             throws SQLException, NullPointerException {
 
         String query = "UPDATE accounts SET balance = ? WHERE code_user = ? AND code_account = ?";
         PreparedStatement pstatement = null;
 
         try {
-            double balance = getBalance(user_code, account);
             if (type == 1) {
                 balance = balance - amount;
             } else {
@@ -168,6 +198,42 @@ public class AccountDAO {
         return 0;
     }
 
+    public int updateTransfers(Connection con, int origin_user, int origin_account,
+                               int dest_user, int dest_account, String subject, double amount)
+            throws SQLException {
+
+        String query = "INSERT into transfers (transfer_code,origin_account,destination_account,amount,date,subject) " +
+                "VALUES(?,?,?,?,?,?)";
+        PreparedStatement pstatement = null;
+
+        try {
+            pstatement = con.prepareStatement(query);
+            pstatement.setInt(1, generate_code());
+            pstatement.setInt(2, origin_account);
+            pstatement.setInt(3, dest_account);
+            pstatement.setDouble(4, amount);
+            pstatement.setTimestamp(5, java.sql.Timestamp.valueOf(java.time.LocalDateTime.now()));
+            pstatement.setString(6, subject);
+            pstatement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return 2;
+        } finally {
+            try {
+                if (pstatement != null) {
+                    pstatement.close();
+                }
+            } catch (Exception e2) {
+                try {
+                    throw new SQLException(e2);
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
+            }
+        }
+        return 0;
+    }
+
     private double getBalance(int user_code, int account)
             throws SQLException {
 
@@ -183,6 +249,67 @@ public class AccountDAO {
             if (result.next()) {
                 return result.getDouble("balance");
             } else throw new SQLException();
+        } finally {
+            try {
+                if (result != null) {
+                    result.close();
+                }
+            } catch (Exception e1) {
+                try {
+                    throw new SQLException(e1);
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
+            }
+            try {
+                if (pstatement != null) {
+                    pstatement.close();
+                }
+            } catch (Exception e2) {
+                try {
+                    throw new SQLException(e2);
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
+            }
+        }
+    }
+
+    public Integer generate_code() {
+        int digits = 7;
+        Random rand = new Random();
+        int min = (int) Math.pow(10, digits - 1);
+        int max = (int) Math.pow(10, digits) - 1;
+        int n = max - min + 1;
+
+        int generated_num = 0;
+
+        String query = "SELECT transfer_code FROM transfers";
+        ResultSet result = null;
+        PreparedStatement pstatement = null;
+        ArrayList<Integer> list = new ArrayList<>(0);
+        try {
+            pstatement = con.prepareStatement(query);
+            result = pstatement.executeQuery();
+            while (result.next()) {
+                list.add(result.getInt("transfer_code"));
+            }
+
+            boolean ok = false;
+            while (!ok) {
+                generated_num = rand.nextInt() % n;
+                for (Integer num : list) {
+                    if (num == generated_num) {
+                        break;
+                    }
+                }
+                ok = true;
+            }
+            return generated_num;
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+            return -1;
         } finally {
             try {
                 if (result != null) {

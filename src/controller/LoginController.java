@@ -3,8 +3,6 @@ package controller;
 import beans.User;
 import dao.HomeDAO;
 import dao.LoginDAO;
-import org.thymeleaf.TemplateEngine;
-import org.thymeleaf.context.WebContext;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ServletContextTemplateResolver;
 
@@ -25,7 +23,6 @@ import java.sql.SQLException;
 public class LoginController extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private Connection connection = null;
-    private TemplateEngine templateEngine;
 
     public LoginController() {
         super();
@@ -54,7 +51,7 @@ public class LoginController extends HttpServlet {
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.getWriter().append("Served at: ").append(request.getContextPath());
+        response.sendRedirect(request.getServletContext().getContextPath() + "/index.html");
     }
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -74,27 +71,17 @@ public class LoginController extends HttpServlet {
 
         LoginDAO userDAO = new LoginDAO(connection);
         User user = null;
-        try {
-            user = userDAO.checkUser(username, password);
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
+        user = userDAO.checkUser(username, password);
+        HttpSession session = request.getSession();
 
         String path = getServletContext().getContextPath();
-        if (user == null) {
-            path += "/index.html";
-        } else {
-            HomeDAO homeDAO = new HomeDAO(connection, user);
-            try {
-                user = homeDAO.fillAccounts(user);
-            } catch (SQLException throwables) {
-                throwables.printStackTrace();
-            }
-            //redirect to Home Page
-            HttpSession session = request.getSession();
-            session.setAttribute("currentUser", user);
-            path += "/HomePageController";
-        }
+        HomeDAO homeDAO = new HomeDAO(connection, user);
+        user = homeDAO.fillAccounts(user);
+        session.setAttribute("currentUser", user);
+
+        //redirect to Home Page
+        response.setStatus(200);
+        path += "/HomePageController";
         response.sendRedirect(path);
     }
 

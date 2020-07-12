@@ -1,13 +1,17 @@
 package beans;
 
+import utils.Utilities;
+
+import java.sql.Timestamp;
 import java.util.Date;
 
 public class Transfer {
-    private Date date;
-    private float amount;
+    private Timestamp date;
+    private double amount;
     private String subject;
     private int origin_account;
     private int dest_account;
+    private int transfer_code;
 
     public Transfer() {
         this.date = null;
@@ -15,6 +19,15 @@ public class Transfer {
         this.subject = "";
         this.origin_account = 0;
         this.dest_account = 0;
+        this.transfer_code = Utilities.generate_code(7);
+    }
+
+    public int getTransfer_code() {
+        return transfer_code;
+    }
+
+    public void setTransfer_code(int transfer_code) {
+        this.transfer_code = transfer_code;
     }
 
     public String getSubject() {
@@ -29,15 +42,15 @@ public class Transfer {
         return date;
     }
 
-    public void setDate(Date date) {
+    public void setDate(Timestamp date) {
         this.date = date;
     }
 
-    public float getAmount() {
+    public double getAmount() {
         return amount;
     }
 
-    public void setAmount(float amount) {
+    public void setAmount(double amount) {
         this.amount = amount;
     }
 

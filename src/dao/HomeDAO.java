@@ -18,8 +18,7 @@ public class HomeDAO {
         this.user = usr;
     }
 
-    public User fillAccounts(User user)
-            throws SQLException {
+    public User fillAccounts(User user) {
         int usr_code = user.getCode();
         String query = "SELECT * FROM accounts WHERE code_user = ?";
         ResultSet result = null;
@@ -33,7 +32,8 @@ public class HomeDAO {
             while (result.next()) {
                 Account account = new Account();
                 account.setCode(result.getInt("code_account"));
-                account.setBalance(result.getInt("balance"));
+                double balance = (double) Math.round(result.getDouble("balance") * 100) / 100;
+                account.setBalance(balance);
                 list.add(account);
             }
             user.setAccounts(list);

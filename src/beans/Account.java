@@ -1,24 +1,16 @@
 package beans;
 
+import utils.Utilities;
+
 import java.util.ArrayList;
-import java.util.Random;
 
 public class Account {
     private int code;
     private double balance;
     private ArrayList<Transfer> movements;
 
-    private Integer generate_code() {
-        Random rand = new Random();
-        int min = 0;
-        int max = 999999999;
-        int n = max - min + 1;
-
-        return rand.nextInt() % n;
-    }
-
     public Account() {
-        this.code = generate_code();
+        this.code = Utilities.generate_code(8);
         this.balance = 0;
         this.movements = new ArrayList<Transfer>(0);
     }
@@ -35,7 +27,7 @@ public class Account {
         return balance;
     }
 
-    public void setBalance(float balance) {
+    public void setBalance(double balance) {
         this.balance = balance;
     }
 

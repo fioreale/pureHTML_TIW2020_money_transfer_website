@@ -5,7 +5,7 @@
     <display-name>TIW-TransferMoney</display-name>
     <context-param>
         <param-name>dbUrl</param-name>
-        <param-value>jdbc:mysql://127.0.0.1:3306/gestioneconti?serverTimezone=UTC</param-value>
+        <param-value>jdbc:mysql://127.0.0.1:3306/gestioneconti</param-value>
     </context-param>
     <context-param>
         <param-name>dbUser</param-name>
@@ -19,6 +19,16 @@
         <param-name>dbDriver</param-name>
         <param-value>com.mysql.cj.jdbc.Driver</param-value>
     </context-param>
+    <filter>
+        <filter-name>SessionFilter</filter-name>
+        <filter-class>filters.SessionFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>SessionFilter</filter-name>
+        <url-pattern>/AccountStatusController</url-pattern>
+        <url-pattern>/HomePageController</url-pattern>
+        <url-pattern>/Logout</url-pattern>
+    </filter-mapping>
     <welcome-file-list>
         <welcome-file>index.html</welcome-file>
     </welcome-file-list>

@@ -7,6 +7,7 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.WebContext;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ServletContextTemplateResolver;
+import utils.Utilities;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -72,8 +73,11 @@ public class AccountStatusController extends HttpServlet {
             response.setHeader("chosenAccount", String.valueOf(chosen_account_code));
         } catch (SQLException throwables) {
             throwables.printStackTrace();
+            response.sendError(502, "Server was not able to fill the movements");
+            return;
         }
 
+        response.setStatus(200);
         String path = "/WEB-INF/Account.html";
         ServletContext servletContext = getServletContext();
         final WebContext ctx = new WebContext(request, response, servletContext, request.getLocale());
@@ -83,7 +87,7 @@ public class AccountStatusController extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        if (!check(request)) {
+        if (!Utilities.checkValidityTransferReq(request)) {
             try {
                 response.sendError(505, "Parameters incomplete");
             } catch (IOException e) {
@@ -103,43 +107,36 @@ public class AccountStatusController extends HttpServlet {
         AccountDAO accountDAO = new AccountDAO(connection, user);
         HomeDAO homeDAO = new HomeDAO(connection, user);
 
-        int outcome_transfer;
         String path = getServletContext().getContextPath();
 
         try {
-            outcome_transfer = accountDAO.doTransfer(user.getCode(), chosen_account_code, versus_user,
-                    versus_account, subject, amount);
             // setting the outcome for the confirmation page
-            response.setHeader("outcome", String.valueOf(outcome_transfer));
 
-            if (outcome_transfer == 0) {
+            if (accountDAO.doTransfer(user.getCode(), chosen_account_code, versus_user,
+                    versus_account, subject, amount) == 0) {
                 // update the user
                 user = homeDAO.fillAccounts(user);
                 user.getAccount(chosen_account_code)
                         .setMovements(accountDAO.fillMovements(user.getAccount(chosen_account_code)));
                 session.setAttribute("currentUser", user);
                 // printing a good outcome page
-                path += "/goodOutcome.html";
-                response.sendRedirect(path);
+                path += "/WEB-INF/goodOutcome.html";
+                response.setStatus(200);
             } else {
                 // printing a bad outcome page
+                response.setStatus(502);
                 path = "/WEB-INF/badOutcome.html";
-                ServletContext servletContext = getServletContext();
-                final WebContext ctx = new WebContext(request, response, servletContext, request.getLocale());
-                templateEngine.process(path, ctx, response.getWriter());
             }
+
+            //response.setHeader("outcome", String.valueOf(outcome_transfer));
+            response.setHeader("chosenAccount", String.valueOf(chosen_account_code));
+            ServletContext servletContext = getServletContext();
+            final WebContext ctx = new WebContext(request, response, servletContext, request.getLocale());
+            templateEngine.process(path, ctx, response.getWriter());
 
         } catch (SQLException throwables) {
             throwables.printStackTrace();
+            response.sendError(502, "Server encountered some issue in the connection with database");
         }
-
-    }
-
-    private boolean check(HttpServletRequest request) {
-        return request.getParameter("user_code") != null &&
-                request.getParameter("account_code") != null &&
-                request.getParameter("subject") != null &&
-                request.getParameter("amount") != null &&
-                request.getParameter("chosenAccountField") != null;
     }
 }

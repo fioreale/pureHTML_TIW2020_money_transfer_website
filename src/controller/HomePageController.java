@@ -35,9 +35,6 @@ public class HomePageController extends HttpServlet {
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String loginpath = getServletContext().getContextPath() + "/index.html";
-        User u = null;
-        HttpSession session = request.getSession();
 
         String path = "/WEB-INF/Home.html";
         ServletContext servletContext = getServletContext();
