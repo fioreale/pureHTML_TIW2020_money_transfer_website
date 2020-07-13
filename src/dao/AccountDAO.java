@@ -36,7 +36,7 @@ public class AccountDAO {
                 transfer.setDate(result.getTimestamp("date"));
                 transfer.setDest_account(result.getInt("destination_account"));
                 transfer.setOrigin_account(result.getInt("origin_account"));
-                transfer.setSubject(result.getString("subject"));
+                transfer.setCasual(result.getString("casual"));
                 list.add(transfer);
             }
         } finally {
@@ -71,6 +71,10 @@ public class AccountDAO {
             throws SQLException {
 
         int out = -1;
+        // check if auto transfer
+        if (dest_account == origin_account)
+            return 6;
+
         // check on the validity of the destination
         if (!checkValidity(dest_user, dest_account)) {
             return 5;
@@ -99,15 +103,16 @@ public class AccountDAO {
             if (out == 0)
                 out = updateTransfers(con, origin_user, origin_account,
                         dest_user, dest_account, subject, amount);
-            con.commit();
+            // check result
+            if (out != 0) {
+                con.rollback(savepoint1);
+            } else {
+                con.commit();
+            }
         } catch (SQLException e) {
             e.printStackTrace();
             con.rollback(savepoint1);
-            con.setAutoCommit(true);
         } finally {
-            if (out != 0) {
-                con.rollback(savepoint1);
-            }
             con.setAutoCommit(true);
         }
 
@@ -115,10 +120,10 @@ public class AccountDAO {
     }
 
     private int updateTransfers(Connection con, int origin_user, int origin_account,
-                               int dest_user, int dest_account, String subject, double amount)
+                                int dest_user, int dest_account, String subject, double amount)
             throws SQLException {
 
-        String query = "INSERT into transfers (transfer_code,origin_account,destination_account,amount,date,subject) " +
+        String query = "INSERT into transfers (transfer_code,origin_account,destination_account,amount,date,casual) " +
                 "VALUES(?,?,?,?,?,?)";
         PreparedStatement pstatement = null;
 
@@ -297,7 +302,7 @@ public class AccountDAO {
 
             boolean ok = false;
             while (!ok) {
-                generated_num = rand.nextInt() % n;
+                generated_num = Math.abs(rand.nextInt() % n);
                 for (Integer num : list) {
                     if (num == generated_num) {
                         break;

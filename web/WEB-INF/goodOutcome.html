@@ -6,15 +6,17 @@
 </head>
 <body>
 <div class="nav">
-    <a class="back" href="Home.html" th:href="@{/HomePageController}">Account Page</a>
+    <a class="back" href="Home.html"
+       th:href="@{/AccountStatusController(account_code=${#response.getHeader('chosenAccount')})}">Account Page</a>
 </div>
 <h1>Your transfer has been processed correctly!</h1>
 <br>
 <fieldset>
     <legend>Your Account</legend>
     <p><b>Balance: </b>
-        <span th:text="${session.currentUser.getAccount(#response.getHeader('chosenAccount')).getBalance()}">0.0</span</p>
-    <p><b>Owner: </b><span th:text="${session.currentUser.getName()}">123456</span></p>
+        <span th:text="${session.currentUser.getAccount(#response.getHeader('chosenAccount')).getBalance()}">0.0</span>
+    </p>
+    <p><b>User code: </b><span th:text="${session.currentUser.getName()}">123456</span></p>
     <p><b>Account Code: </b><span th:text="${#response.getHeader('chosenAccount')}">111111</span></p>
 </fieldset>
 <br>
@@ -22,7 +24,7 @@
     <legend>Account you sent money</legend>
     <p><b>Balance: </b>
         <span th:text="${#response.getHeader('balance_dest')}">0.0</span</p>
-    <p><b>Owner: </b><span th:text="${#response.getHeader('user_dest')}">123456</span></p>
+    <p><b>User code: </b><span th:text="${#response.getHeader('user_dest')}">123456</span></p>
     <p><b>Account Code: </b><span th:text="${#response.getHeader('account_dest')}">111111</span></p>
 </fieldset>
 </body>

@@ -69,14 +69,14 @@ public class AccountStatusController extends HttpServlet {
                     .setMovements(
                             accountDAO.fillMovements(user.getAccount(chosen_account))
                     );
-            session.setAttribute("currentUser", user);
-            response.setHeader("chosenAccount", String.valueOf(chosen_account_code));
         } catch (SQLException throwables) {
             throwables.printStackTrace();
             response.sendError(502, "Server was not able to fill the movements");
             return;
         }
 
+        session.setAttribute("currentUser", user);
+        response.setHeader("chosenAccount", String.valueOf(chosen_account_code));
         response.setStatus(200);
         String path = "/WEB-INF/Account.html";
         ServletContext servletContext = getServletContext();
@@ -153,8 +153,15 @@ public class AccountStatusController extends HttpServlet {
                     return;
                 } else if (outcome_transfer == 5) {
                     try {
-                        response.sendError(204, "The server does not contain any user or account associated " +
+                        response.sendError(400, "The server does not contain any user or account associated " +
                                 "to the credentials you specified");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    return;
+                } else if (outcome_transfer == 6) {
+                    try {
+                        response.sendError(400, "You are trying to send money to yourself");
                     } catch (IOException e) {
                         e.printStackTrace();
                     }

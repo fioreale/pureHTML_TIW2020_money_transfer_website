@@ -16,7 +16,7 @@
     <legend><h2>Account Details</h2></legend>
     <p><b>Balance: </b>
         <span th:text="${session.currentUser.getAccount(#response.getHeader('chosenAccount')).getBalance()}">0</span</p>
-    <p><b>Owner: </b><span th:text="${session.currentUser.getCode()}">Alessio</span></p>
+    <p><b>User code: </b><span th:text="${session.currentUser.getCode()}">Alessio</span></p>
     <p><b>Account Code: </b><span th:text="${#response.getHeader('chosenAccount')}">Alessio</span></p>
 </fieldset>
 
@@ -39,7 +39,7 @@
         <td th:text="${transfer.getDate()}"></td>
         <td th:text="${transfer.getDest_account()}"></td>
         <td class="exit" th:text="${transfer.getAmount()}"></td>
-        <td th:text="${transfer.getSubject()}"></td>
+        <td th:text="${transfer.getCasual()}"></td>
     </tr>
     </tbody>
 </table>
@@ -61,7 +61,7 @@
         <td th:text="${transfer.getDate()}"></td>
         <td th:text="${transfer.getDest_account()}"></td>
         <td class="entrance" th:text="${transfer.getAmount()}"></td>
-        <td th:text="${transfer.getSubject()}"></td>
+        <td th:text="${transfer.getCasual()}"></td>
     </tr>
     </tbody>
 </table>
