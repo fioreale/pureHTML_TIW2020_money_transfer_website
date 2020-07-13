@@ -107,29 +107,72 @@ public class AccountStatusController extends HttpServlet {
         AccountDAO accountDAO = new AccountDAO(connection, user);
         HomeDAO homeDAO = new HomeDAO(connection, user);
 
-        String path = getServletContext().getContextPath();
+        int outcome_transfer;
 
         try {
             // setting the outcome for the confirmation page
 
-            if (accountDAO.doTransfer(user.getCode(), chosen_account_code, versus_user,
-                    versus_account, subject, amount) == 0) {
+            outcome_transfer = accountDAO.doTransfer(user.getCode(), chosen_account_code, versus_user,
+                    versus_account, subject, amount);
+            if (outcome_transfer == 0) {
                 // update the user
                 user = homeDAO.fillAccounts(user);
                 user.getAccount(chosen_account_code)
                         .setMovements(accountDAO.fillMovements(user.getAccount(chosen_account_code)));
-                session.setAttribute("currentUser", user);
-                // printing a good outcome page
-                path += "/WEB-INF/goodOutcome.html";
-                response.setStatus(200);
+
             } else {
                 // printing a bad outcome page
-                response.setStatus(502);
-                path = "/WEB-INF/badOutcome.html";
+                if (outcome_transfer == 1) {
+                    try {
+                        response.sendError(400, "The amount specified cannot be transferred due to " +
+                                "restricted balance");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    return;
+                } else if (outcome_transfer == 2) {
+                    try {
+                        response.sendError(502, "It's not possible to fulfill the transfer");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    return;
+                } else if (outcome_transfer == 3) {
+                    try {
+                        response.sendError(502, "It's not possible to update your balance");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    return;
+                } else if (outcome_transfer == 4) {
+                    try {
+                        response.sendError(502, "It's not possible to update the balance of the account you sent money");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    return;
+                } else if (outcome_transfer == 5) {
+                    try {
+                        response.sendError(204, "The server does not contain any user or account associated " +
+                                "to the credentials you specified");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    return;
+                }
             }
 
-            //response.setHeader("outcome", String.valueOf(outcome_transfer));
+            // taking the balance of the destination
+            double dest_balance = accountDAO.getBalance(versus_user, versus_account);
+
+            session.setAttribute("currentUser", user);
+            // printing a good outcome page
+            String path = "/WEB-INF/goodOutcome.html";
+            response.setStatus(200);
             response.setHeader("chosenAccount", String.valueOf(chosen_account_code));
+            response.setHeader("balance_dest", String.valueOf(dest_balance));
+            response.setHeader("account_dest", String.valueOf(versus_account));
+            response.setHeader("user_dest", String.valueOf(versus_user));
             ServletContext servletContext = getServletContext();
             final WebContext ctx = new WebContext(request, response, servletContext, request.getLocale());
             templateEngine.process(path, ctx, response.getWriter());

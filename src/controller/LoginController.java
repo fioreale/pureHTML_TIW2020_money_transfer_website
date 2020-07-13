@@ -70,10 +70,20 @@ public class LoginController extends HttpServlet {
         }
 
         LoginDAO userDAO = new LoginDAO(connection);
-        User user = null;
+        User user;
         user = userDAO.checkUser(username, password);
-        HttpSession session = request.getSession();
 
+        if (user == null) {
+            try {
+                response.sendError(204, "The server does not contain any user associated " +
+                        "to the credentials you specified");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return;
+        }
+
+        HttpSession session = request.getSession();
         String path = getServletContext().getContextPath();
         HomeDAO homeDAO = new HomeDAO(connection, user);
         user = homeDAO.fillAccounts(user);

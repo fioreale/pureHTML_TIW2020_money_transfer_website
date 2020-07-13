@@ -114,6 +114,42 @@ public class AccountDAO {
         return out;
     }
 
+    private int updateTransfers(Connection con, int origin_user, int origin_account,
+                               int dest_user, int dest_account, String subject, double amount)
+            throws SQLException {
+
+        String query = "INSERT into transfers (transfer_code,origin_account,destination_account,amount,date,subject) " +
+                "VALUES(?,?,?,?,?,?)";
+        PreparedStatement pstatement = null;
+
+        try {
+            pstatement = con.prepareStatement(query);
+            pstatement.setInt(1, generate_code());
+            pstatement.setInt(2, origin_account);
+            pstatement.setInt(3, dest_account);
+            pstatement.setDouble(4, amount);
+            pstatement.setTimestamp(5, java.sql.Timestamp.valueOf(java.time.LocalDateTime.now()));
+            pstatement.setString(6, subject);
+            pstatement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return 2;
+        } finally {
+            try {
+                if (pstatement != null) {
+                    pstatement.close();
+                }
+            } catch (Exception e2) {
+                try {
+                    throw new SQLException(e2);
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
+            }
+        }
+        return 0;
+    }
+
     private boolean checkValidity(int dest_user, int dest_account) {
         String query = "SELECT * FROM accounts WHERE code_user = ? AND code_account = ?";
         ResultSet result = null;
@@ -198,43 +234,7 @@ public class AccountDAO {
         return 0;
     }
 
-    public int updateTransfers(Connection con, int origin_user, int origin_account,
-                               int dest_user, int dest_account, String subject, double amount)
-            throws SQLException {
-
-        String query = "INSERT into transfers (transfer_code,origin_account,destination_account,amount,date,subject) " +
-                "VALUES(?,?,?,?,?,?)";
-        PreparedStatement pstatement = null;
-
-        try {
-            pstatement = con.prepareStatement(query);
-            pstatement.setInt(1, generate_code());
-            pstatement.setInt(2, origin_account);
-            pstatement.setInt(3, dest_account);
-            pstatement.setDouble(4, amount);
-            pstatement.setTimestamp(5, java.sql.Timestamp.valueOf(java.time.LocalDateTime.now()));
-            pstatement.setString(6, subject);
-            pstatement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return 2;
-        } finally {
-            try {
-                if (pstatement != null) {
-                    pstatement.close();
-                }
-            } catch (Exception e2) {
-                try {
-                    throw new SQLException(e2);
-                } catch (SQLException throwables) {
-                    throwables.printStackTrace();
-                }
-            }
-        }
-        return 0;
-    }
-
-    private double getBalance(int user_code, int account)
+    public double getBalance(int user_code, int account)
             throws SQLException {
 
         String query = "SELECT * FROM accounts WHERE code_user = ? AND code_account = ?";
@@ -275,7 +275,7 @@ public class AccountDAO {
         }
     }
 
-    public Integer generate_code() {
+    private Integer generate_code() {
         int digits = 7;
         Random rand = new Random();
         int min = (int) Math.pow(10, digits - 1);

@@ -2,7 +2,7 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" type="text/css" media="all"
+    <link rel="stylesheet" type="text/css"
           href="../css/home.css" th:href="@{css/home.css}">
     <title>Home</title>
 </head>
@@ -10,25 +10,25 @@
 <div class="logout">
     <a href="../index.html" th:href="@{/Logout}">Logout</a>
 </div>
-<h1>
-    List of Accounts
-</h1>
-<h2>
-    User ~<span th:text="${session.currentUser.getName()}">Alessio</span>~
-</h2>
-<h3>
-    User Code ~<span th:text="${session.currentUser.getCode()}">123456</span>~
-</h3>
+<h1>List of Accounts</h1>
+<fieldset>
+    <legend>User info</legend>
+    <p><b>User: </b><span th:text="${session.currentUser.getName()}">Alessio</span><br></p>
+    <p><b>User Code: </b><span th:text="${session.currentUser.getCode()}">123456</span></p>
+</fieldset>
 <form th:action="@{/AccountStatusController}"
       method="get">
+    <p>
     <fieldset>
-        <legend>Choose an Account:</legend>
+        <legend>Choose an Account</legend>
         <div th:each="acc : ${session.currentUser.getAccounts()}">
-            <span th:text="${'Account: ' + acc.getCode()}"></span>
             <input type="radio" name="account_code" th:value="${acc.getCode()}" required/>
+            <span th:text="${'Account: ' + acc.getCode()}"></span><br>
         </div>
     </fieldset>
-    <input type="submit" name="submit" value="Go to the Account">
+    <p>
+        <input type="submit" name="submit" value="Go to the Account">
+    </p>
 </form>
 </body>
 </html>
