@@ -3,6 +3,7 @@ package dao;
 import beans.Account;
 import beans.Transfer;
 import beans.User;
+import utils.Utilities;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -40,28 +41,7 @@ public class AccountDAO {
                 list.add(transfer);
             }
         } finally {
-            try {
-                if (result != null) {
-                    result.close();
-                }
-            } catch (Exception e1) {
-                try {
-                    throw new SQLException(e1);
-                } catch (SQLException throwables) {
-                    throwables.printStackTrace();
-                }
-            }
-            try {
-                if (pstatement != null) {
-                    pstatement.close();
-                }
-            } catch (Exception e2) {
-                try {
-                    throw new SQLException(e2);
-                } catch (SQLException throwables) {
-                    throwables.printStackTrace();
-                }
-            }
+            Utilities.closeDbAccess(result, pstatement);
         }
         return list;
     }
@@ -140,17 +120,7 @@ public class AccountDAO {
             e.printStackTrace();
             return 2;
         } finally {
-            try {
-                if (pstatement != null) {
-                    pstatement.close();
-                }
-            } catch (Exception e2) {
-                try {
-                    throw new SQLException(e2);
-                } catch (SQLException throwables) {
-                    throwables.printStackTrace();
-                }
-            }
+            Utilities.closeDbAccess(null, pstatement);
         }
         return 0;
     }
@@ -171,34 +141,14 @@ public class AccountDAO {
             throwables.printStackTrace();
             return false;
         } finally {
-            try {
-                if (result != null) {
-                    result.close();
-                }
-            } catch (Exception e1) {
-                try {
-                    throw new SQLException(e1);
-                } catch (SQLException throwables) {
-                    throwables.printStackTrace();
-                }
-            }
-            try {
-                if (pstatement != null) {
-                    pstatement.close();
-                }
-            } catch (Exception e2) {
-                try {
-                    throw new SQLException(e2);
-                } catch (SQLException throwables) {
-                    throwables.printStackTrace();
-                }
-            }
+            Utilities.closeDbAccess(result, pstatement);
         }
         return true;
     }
 
     private boolean check_amount(double amount, int account) {
-        return user.getAccount(account).getBalance() >= amount;
+        return user.getAccount(account).getBalance() >= amount ||
+                amount > 0;
     }
 
     private int updateBalance(Connection con, int user_code, int account, double amount, double balance, int type)
@@ -224,17 +174,7 @@ public class AccountDAO {
                 return 3;
             else return 4;
         } finally {
-            try {
-                if (pstatement != null) {
-                    pstatement.close();
-                }
-            } catch (Exception e2) {
-                try {
-                    throw new SQLException(e2);
-                } catch (SQLException throwables) {
-                    throwables.printStackTrace();
-                }
-            }
+            Utilities.closeDbAccess(null, pstatement);
         }
         return 0;
     }
@@ -255,28 +195,7 @@ public class AccountDAO {
                 return result.getDouble("balance");
             } else throw new SQLException();
         } finally {
-            try {
-                if (result != null) {
-                    result.close();
-                }
-            } catch (Exception e1) {
-                try {
-                    throw new SQLException(e1);
-                } catch (SQLException throwables) {
-                    throwables.printStackTrace();
-                }
-            }
-            try {
-                if (pstatement != null) {
-                    pstatement.close();
-                }
-            } catch (Exception e2) {
-                try {
-                    throw new SQLException(e2);
-                } catch (SQLException throwables) {
-                    throwables.printStackTrace();
-                }
-            }
+            Utilities.closeDbAccess(result, pstatement);
         }
     }
 
@@ -316,28 +235,7 @@ public class AccountDAO {
             throwables.printStackTrace();
             return -1;
         } finally {
-            try {
-                if (result != null) {
-                    result.close();
-                }
-            } catch (Exception e1) {
-                try {
-                    throw new SQLException(e1);
-                } catch (SQLException throwables) {
-                    throwables.printStackTrace();
-                }
-            }
-            try {
-                if (pstatement != null) {
-                    pstatement.close();
-                }
-            } catch (Exception e2) {
-                try {
-                    throw new SQLException(e2);
-                } catch (SQLException throwables) {
-                    throwables.printStackTrace();
-                }
-            }
+            Utilities.closeDbAccess(result, pstatement);
         }
     }
 }

@@ -2,6 +2,7 @@ package dao;
 
 import beans.Account;
 import beans.User;
+import utils.Utilities;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -46,28 +47,7 @@ public class HomeDAO {
             }
 
         } finally {
-            try {
-                if (result != null) {
-                    result.close();
-                }
-            } catch (Exception e1) {
-                try {
-                    throw new SQLException(e1);
-                } catch (SQLException throwables) {
-                    throwables.printStackTrace();
-                }
-            }
-            try {
-                if (pstatement != null) {
-                    pstatement.close();
-                }
-            } catch (Exception e2) {
-                try {
-                    throw new SQLException(e2);
-                } catch (SQLException throwables) {
-                    throwables.printStackTrace();
-                }
-            }
+            Utilities.closeDbAccess(result, pstatement);
         }
         return user;
     }

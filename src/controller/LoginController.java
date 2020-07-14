@@ -88,6 +88,7 @@ public class LoginController extends HttpServlet {
         HomeDAO homeDAO = new HomeDAO(connection, user);
         user = homeDAO.fillAccounts(user);
         session.setAttribute("currentUser", user);
+        session.setMaxInactiveInterval(30 * 60);
 
         //redirect to Home Page
         response.setStatus(200);

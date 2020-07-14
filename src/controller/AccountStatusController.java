@@ -95,11 +95,21 @@ public class AccountStatusController extends HttpServlet {
             }
             return;
         }
+        int versus_user;
+        int versus_account;
+        String subject;
+        double amount;
+        try {
+            versus_user = Integer.parseInt(request.getParameter("user_code"));
+            versus_account = Integer.parseInt(request.getParameter("account_code"));
+            subject = request.getParameter("subject");
+            amount = Double.parseDouble(request.getParameter("amount"));
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+            response.sendError(response.SC_NOT_ACCEPTABLE, "The form contains input in a non valid format");
+            return;
+        }
 
-        int versus_user = Integer.parseInt(request.getParameter("user_code"));
-        int versus_account = Integer.parseInt(request.getParameter("account_code"));
-        String subject = request.getParameter("subject");
-        double amount = Double.parseDouble(request.getParameter("amount"));
 
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("currentUser");
@@ -124,8 +134,7 @@ public class AccountStatusController extends HttpServlet {
                 // printing a bad outcome page
                 if (outcome_transfer == 1) {
                     try {
-                        response.sendError(400, "The amount specified cannot be transferred due to " +
-                                "restricted balance");
+                        response.sendError(400, "The amount specified cannot be transferred");
                     } catch (IOException e) {
                         e.printStackTrace();
                     }

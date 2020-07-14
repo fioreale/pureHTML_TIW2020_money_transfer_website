@@ -1,6 +1,8 @@
 package utils;
 
 import javax.servlet.http.HttpServletRequest;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.Random;
 
 public class Utilities {
@@ -21,5 +23,21 @@ public class Utilities {
                 request.getParameter("subject") != null &&
                 request.getParameter("amount") != null &&
                 request.getParameter("chosenAccountField") != null;
+    }
+
+    public static void closeDbAccess(ResultSet result, PreparedStatement statement) {
+        try {
+            if (result != null)
+                result.close();
+        }catch(Exception e) {
+            System.out.println("SQL RESULT ERROR");
+        }
+
+        try {
+            if (statement != null)
+                statement.close();
+        }catch (Exception e) {
+            System.out.println("SQL STATEMENT ERROR");
+        }
     }
 }
