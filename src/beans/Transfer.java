@@ -8,7 +8,7 @@ import java.util.Date;
 public class Transfer {
     private Timestamp date;
     private double amount;
-    private String casual;
+    private String causal;
     private int origin_account;
     private int dest_account;
     private int transfer_code;
@@ -16,7 +16,7 @@ public class Transfer {
     public Transfer() {
         this.date = null;
         this.amount = 0;
-        this.casual = "";
+        this.causal = "";
         this.origin_account = 0;
         this.dest_account = 0;
         this.transfer_code = Utilities.generate_code(7);
@@ -30,12 +30,12 @@ public class Transfer {
         this.transfer_code = transfer_code;
     }
 
-    public String getCasual() {
-        return casual;
+    public String getCausal() {
+        return causal;
     }
 
-    public void setCasual(String casual) {
-        this.casual = casual;
+    public void setCausal(String causal) {
+        this.causal = causal;
     }
 
     public Date getDate() {

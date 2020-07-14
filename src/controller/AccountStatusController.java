@@ -118,6 +118,7 @@ public class AccountStatusController extends HttpServlet {
         HomeDAO homeDAO = new HomeDAO(connection, user);
 
         int outcome_transfer;
+        String path;
 
         try {
             // setting the outcome for the confirmation page
@@ -129,66 +130,41 @@ public class AccountStatusController extends HttpServlet {
                 user = homeDAO.fillAccounts(user);
                 user.getAccount(chosen_account_code)
                         .setMovements(accountDAO.fillMovements(user.getAccount(chosen_account_code)));
-
+                // printing a good outcome page
+                // taking the balance of the destination
+                double dest_balance = accountDAO.getBalance(versus_user, versus_account);
+                path = "/WEB-INF/goodOutcome.html";
+                response.setStatus(200);
+                response.setHeader("balance_dest", String.valueOf(dest_balance));
+                response.setHeader("account_dest", String.valueOf(versus_account));
+                response.setHeader("user_dest", String.valueOf(versus_user));
             } else {
                 // printing a bad outcome page
+                path = "/WEB-INF/badOutcome.html";
                 if (outcome_transfer == 1) {
-                    try {
-                        response.sendError(400, "The amount specified cannot be transferred");
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    return;
+                    response.setStatus(400);
+                    response.setHeader("outcome", "The amount specified cannot be transferred");
                 } else if (outcome_transfer == 2) {
-                    try {
-                        response.sendError(502, "It's not possible to fulfill the transfer");
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    return;
+                    response.setStatus(502);
+                    response.setHeader("outcome", "It's not possible to fulfill the transfer");
                 } else if (outcome_transfer == 3) {
-                    try {
-                        response.sendError(502, "It's not possible to update your balance");
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    return;
+                    response.setStatus(502);
+                    response.setHeader("outcome", "It's not possible to update your balance");
                 } else if (outcome_transfer == 4) {
-                    try {
-                        response.sendError(502, "It's not possible to update the balance of the account you sent money");
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    return;
+                    response.setStatus(502);
+                    response.setHeader("outcome", "It's not possible to update the balance of the account you sent money");
                 } else if (outcome_transfer == 5) {
-                    try {
-                        response.sendError(400, "The server does not contain any user or account associated " +
-                                "to the credentials you specified");
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    return;
+                    response.setStatus(400);
+                    response.setHeader("outcome", "The server does not contain any user or account associated to " +
+                            "the credentials you specified");
                 } else if (outcome_transfer == 6) {
-                    try {
-                        response.sendError(400, "You are trying to send money to yourself");
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    return;
+                    response.setStatus(400);
+                    response.setHeader("outcome", "You are trying to send money to yourself");
                 }
             }
 
-            // taking the balance of the destination
-            double dest_balance = accountDAO.getBalance(versus_user, versus_account);
-
-            session.setAttribute("currentUser", user);
-            // printing a good outcome page
-            String path = "/WEB-INF/goodOutcome.html";
-            response.setStatus(200);
             response.setHeader("chosenAccount", String.valueOf(chosen_account_code));
-            response.setHeader("balance_dest", String.valueOf(dest_balance));
-            response.setHeader("account_dest", String.valueOf(versus_account));
-            response.setHeader("user_dest", String.valueOf(versus_user));
+            session.setAttribute("currentUser", user);
             ServletContext servletContext = getServletContext();
             final WebContext ctx = new WebContext(request, response, servletContext, request.getLocale());
             templateEngine.process(path, ctx, response.getWriter());

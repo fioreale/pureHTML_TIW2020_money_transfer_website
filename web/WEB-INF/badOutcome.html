@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="https://img.icons8.com/cotton/64/000000/cash-euro.png">
+    <title>Transfer Outcome</title>
+</head>
+<body>
+<div class="nav">
+    <a class="back" href="Home.html"
+       th:href="@{/AccountStatusController(account_code=${#response.getHeader('chosenAccount')})}">Account Page</a>
+</div>
+<h1>Unfortunately it was not possible to proceed with the transfer</h1>
+<h2>The occurred failure is due to the issue:</h2>
+<p>
+<div>
+    <span th:text="${#response.getHeader('outcome')}">
+        The balance of your account is not enough to afford the transaction.
+    </span>
+</div>
+</body>
+</html>

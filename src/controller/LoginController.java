@@ -51,7 +51,18 @@ public class LoginController extends HttpServlet {
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.sendRedirect(request.getServletContext().getContextPath() + "/index.html");
+        HttpSession session = request.getSession();
+        if (session != null) {
+            User user = (User) session.getAttribute("currentUser");
+            if (user != null) {
+                response.setStatus(200);
+                session.setAttribute("currentUser", user);
+                String path = getServletContext().getContextPath() + "/HomePageController";
+                response.sendRedirect(path);
+            }
+        } else {
+            response.sendRedirect(request.getServletContext().getContextPath() + "/index.html");
+        }
     }
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response)

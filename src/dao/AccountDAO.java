@@ -37,7 +37,7 @@ public class AccountDAO {
                 transfer.setDate(result.getTimestamp("date"));
                 transfer.setDest_account(result.getInt("destination_account"));
                 transfer.setOrigin_account(result.getInt("origin_account"));
-                transfer.setCasual(result.getString("casual"));
+                transfer.setCausal(result.getString("causal"));
                 list.add(transfer);
             }
         } finally {
@@ -100,10 +100,10 @@ public class AccountDAO {
     }
 
     private int updateTransfers(Connection con, int origin_user, int origin_account,
-                                int dest_user, int dest_account, String subject, double amount)
+                                int dest_user, int dest_account, String causal, double amount)
             throws SQLException {
 
-        String query = "INSERT into transfers (transfer_code,origin_account,destination_account,amount,date,casual) " +
+        String query = "INSERT into transfers (transfer_code,origin_account,destination_account,amount,date,causal) " +
                 "VALUES(?,?,?,?,?,?)";
         PreparedStatement pstatement = null;
 
@@ -114,7 +114,7 @@ public class AccountDAO {
             pstatement.setInt(3, dest_account);
             pstatement.setDouble(4, amount);
             pstatement.setTimestamp(5, java.sql.Timestamp.valueOf(java.time.LocalDateTime.now()));
-            pstatement.setString(6, subject);
+            pstatement.setString(6, causal);
             pstatement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -147,7 +147,7 @@ public class AccountDAO {
     }
 
     private boolean check_amount(double amount, int account) {
-        return user.getAccount(account).getBalance() >= amount ||
+        return user.getAccount(account).getBalance() >= amount &&
                 amount > 0;
     }
 
