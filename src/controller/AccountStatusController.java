@@ -174,4 +174,14 @@ public class AccountStatusController extends HttpServlet {
             response.sendError(502, "Server encountered some issue in the connection with database");
         }
     }
+
+    public void destroy() {
+        try {
+            if (connection != null) {
+                connection.close();
+            }
+        } catch (SQLException sqle) {
+            sqle.printStackTrace();
+        }
+    }
 }
