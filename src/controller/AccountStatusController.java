@@ -69,9 +69,9 @@ public class AccountStatusController extends HttpServlet {
                     .setMovements(
                             accountDAO.fillMovements(user.getAccount(chosen_account_code))
                     );
-        } catch (SQLException | NumberFormatException throwables) {
+        } catch (SQLException | NumberFormatException | NullPointerException throwables) {
             throwables.printStackTrace();
-            response.sendError(502, "Server was not able to fill the movements");
+            response.sendError(502, "Server was not able to fill the movements for the account you specified");
             return;
         }
 
@@ -99,12 +99,14 @@ public class AccountStatusController extends HttpServlet {
         int versus_account;
         String subject;
         double amount;
+        int chosen_account_code;
         try {
             versus_user = Integer.parseInt(request.getParameter("user_code"));
             versus_account = Integer.parseInt(request.getParameter("account_code"));
             subject = request.getParameter("subject");
             amount = Double.parseDouble(request.getParameter("amount"));
-        } catch (NumberFormatException e) {
+            chosen_account_code = Integer.parseInt(request.getParameter("chosenAccountField"));
+        } catch (NumberFormatException | NullPointerException e) {
             e.printStackTrace();
             response.sendError(response.SC_NOT_ACCEPTABLE, "The form contains input in a non valid format");
             return;
@@ -113,7 +115,6 @@ public class AccountStatusController extends HttpServlet {
 
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("currentUser");
-        int chosen_account_code = Integer.parseInt(request.getParameter("chosenAccountField"));
         AccountDAO accountDAO = new AccountDAO(connection, user);
         HomeDAO homeDAO = new HomeDAO(connection, user);
 
@@ -169,7 +170,7 @@ public class AccountStatusController extends HttpServlet {
             final WebContext ctx = new WebContext(request, response, servletContext, request.getLocale());
             templateEngine.process(path, ctx, response.getWriter());
 
-        } catch (SQLException throwables) {
+        } catch (SQLException | NullPointerException throwables) {
             throwables.printStackTrace();
             response.sendError(502, "Server encountered some issue in the connection with database");
         }

@@ -52,7 +52,7 @@ public class AccountDAO {
 
         int out = -1;
         // check if auto transfer
-        if (dest_account == origin_account)
+        if (dest_account == origin_account && origin_user == dest_user)
             return 6;
 
         // check on the validity of the destination

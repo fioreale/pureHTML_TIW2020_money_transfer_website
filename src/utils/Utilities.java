@@ -25,6 +25,14 @@ public class Utilities {
                 request.getParameter("chosenAccountField") != null;
     }
 
+    public static boolean isLoginFormValid(String username, String password) {
+        return isInputValid(username, 50) && isInputValid(password, 45);
+    }
+
+    private static boolean isInputValid(String input, int maxLength) {
+        return input != null && !input.isEmpty() && input.length() <= maxLength;
+    }
+
     public static void closeDbAccess(ResultSet result, PreparedStatement statement) {
         try {
             if (result != null)

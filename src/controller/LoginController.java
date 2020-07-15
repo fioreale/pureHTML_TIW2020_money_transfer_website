@@ -5,6 +5,7 @@ import dao.HomeDAO;
 import dao.LoginDAO;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ServletContextTemplateResolver;
+import utils.Utilities;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -71,7 +72,7 @@ public class LoginController extends HttpServlet {
         String username = request.getParameter("username");
         String password = request.getParameter("password");
 
-        if (username == null || password == null) {
+        if (username == null || password == null || !Utilities.isLoginFormValid(username, password)) {
             try {
                 response.sendError(505, "Parameters incomplete");
             } catch (IOException e) {
@@ -86,7 +87,7 @@ public class LoginController extends HttpServlet {
 
         if (user == null) {
             try {
-                response.sendError(204, "The server does not contain any user associated " +
+                response.sendError(400, "The server does not contain any user associated " +
                         "to the credentials you specified");
             } catch (IOException e) {
                 e.printStackTrace();
