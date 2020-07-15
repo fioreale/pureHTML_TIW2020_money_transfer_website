@@ -59,17 +59,17 @@ public class AccountStatusController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        int chosen_account_code = Integer.parseInt(request.getParameter("account_code"));
+        int chosen_account_code;
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("currentUser");
         AccountDAO accountDAO = new AccountDAO(connection, user);
-        int chosen_account = Integer.parseInt(request.getParameter("account_code"));
         try {
-            user.getAccount(chosen_account)
+            chosen_account_code = Integer.parseInt(request.getParameter("account_code"));
+            user.getAccount(chosen_account_code)
                     .setMovements(
-                            accountDAO.fillMovements(user.getAccount(chosen_account))
+                            accountDAO.fillMovements(user.getAccount(chosen_account_code))
                     );
-        } catch (SQLException throwables) {
+        } catch (SQLException | NumberFormatException throwables) {
             throwables.printStackTrace();
             response.sendError(502, "Server was not able to fill the movements");
             return;

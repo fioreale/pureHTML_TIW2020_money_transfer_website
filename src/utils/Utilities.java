@@ -29,14 +29,14 @@ public class Utilities {
         try {
             if (result != null)
                 result.close();
-        }catch(Exception e) {
+        } catch (Exception e) {
             System.out.println("SQL RESULT ERROR");
         }
 
         try {
             if (statement != null)
                 statement.close();
-        }catch (Exception e) {
+        } catch (Exception e) {
             System.out.println("SQL STATEMENT ERROR");
         }
     }
